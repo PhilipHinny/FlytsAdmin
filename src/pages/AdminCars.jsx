@@ -103,7 +103,7 @@ const AdminCars = () => {
     if (!selectedCar) return
     try {
       setIsSaving(true)
-      const updatedCar = await tryApi("PUT", `/admin/cars/${selectedCar.id}`, updates)
+      const updatedCar = await tryApi("PATCH", `/admin/cars/${selectedCar.id}`, updates)
       setCars((prev) =>
         prev.map((c) => (c.id === selectedCar.id ? { ...c, ...updatedCar, ...updates } : c))
       )
