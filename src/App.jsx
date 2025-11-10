@@ -12,23 +12,30 @@ import AdminContent from "./pages/AdminContent";
 import AdminSettings from "./pages/AdminSettings";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminHelp from "./pages/AdminHelp";
+import AdminLogin from "./pages/AdminLogin";
+import AdminEmployees from "./pages/AdminEmployees";
+import RequireAuth from "../src/components/RequireAuth";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<AdminDashboard />} />
-        <Route path="/users" element={<AdminUsers />} />
-        <Route path="/hosts" element={<AdminHosts />} />
-        <Route path="/cars" element={<AdminCars />} />
-        <Route path="/bookings" element={<AdminBookings />} />
-        <Route path="/payments" element={<AdminPayments />} />
-        <Route path="/reports" element={<AdminReports />} />
-        <Route path="/messages" element={<AdminMessages />} />
-        <Route path="/content" element={<AdminContent />} />
-        <Route path="/settings" element={<AdminSettings />} />
-        <Route path="/analytics" element={<AdminAnalytics />} />
-        <Route path="/help" element={<AdminHelp />} />
+        <Route path="/login" element={<AdminLogin />} />
+        <Route element={<RequireAuth /> }>
+          <Route path="/" element={<AdminDashboard />} />
+          <Route path="/users" element={<AdminUsers />} />
+          <Route path="/hosts" element={<AdminHosts />} />
+          <Route path="/cars" element={<AdminCars />} />
+          <Route path="/bookings" element={<AdminBookings />} />
+          <Route path="/payments" element={<AdminPayments />} />
+          <Route path="/reports" element={<AdminReports />} />
+          <Route path="/messages" element={<AdminMessages />} />
+          <Route path="/content" element={<AdminContent />} />
+          <Route path="/settings" element={<AdminSettings />} />
+          <Route path="/analytics" element={<AdminAnalytics />} />
+          <Route path="/help" element={<AdminHelp />} />
+          <Route path="/employees" element={<AdminEmployees />} />
+        </Route>
       </Routes>
     </Router>
   );

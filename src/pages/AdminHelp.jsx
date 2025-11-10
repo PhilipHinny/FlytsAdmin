@@ -3,7 +3,7 @@
 import { useState } from "react"
 import React from "react"
 
-import { Search, HelpCircle, Book, MessageCircle, Phone, Mail, ExternalLink } from "lucide-react"
+import { Search, HelpCircle, Book, MessageCircle, Phone, Mail } from "lucide-react"
 import AdminSidebar from "../components/AdminSidebar"
 import "../styles/AdminHelp.css"
 
@@ -12,81 +12,18 @@ const AdminHelp = () => {
   const [activeCategory, setActiveCategory] = useState("all")
 
   const helpCategories = [
-    { id: "all", name: "All Topics", count: 24 },
-    { id: "getting-started", name: "Getting Started", count: 6 },
-    { id: "user-management", name: "User Management", count: 8 },
-    { id: "platform-settings", name: "Platform Settings", count: 5 },
-    { id: "troubleshooting", name: "Troubleshooting", count: 5 },
+    { id: "getting-started", name: "Getting Started", count: 6, iconClass: "getting-started" },
+    { id: "user-management", name: "User Management", count: 8, iconClass: "user-management" },
+    { id: "payments", name: "Payments", count: 5, iconClass: "payments" },
+    { id: "technical", name: "Technical", count: 5, iconClass: "technical" },
   ]
 
   const helpArticles = [
-    {
-      id: 1,
-      title: "Admin Dashboard Overview",
-      category: "getting-started",
-      description: "Learn about the main features and navigation of the admin dashboard",
-      lastUpdated: "2024-01-20",
-      views: 245,
-    },
-    {
-      id: 2,
-      title: "Managing User Accounts",
-      category: "user-management",
-      description: "How to view, edit, suspend, and manage user accounts",
-      lastUpdated: "2024-01-18",
-      views: 189,
-    },
-    {
-      id: 3,
-      title: "Configuring Platform Settings",
-      category: "platform-settings",
-      description: "Step-by-step guide to configure platform-wide settings",
-      lastUpdated: "2024-01-15",
-      views: 156,
-    },
-    {
-      id: 4,
-      title: "Host Verification Process",
-      category: "user-management",
-      description: "Understanding and managing the host verification workflow",
-      lastUpdated: "2024-01-12",
-      views: 203,
-    },
-    {
-      id: 5,
-      title: "Payment System Troubleshooting",
-      category: "troubleshooting",
-      description: "Common payment issues and how to resolve them",
-      lastUpdated: "2024-01-10",
-      views: 134,
-    },
-  ]
-
-  const quickActions = [
-    {
-      title: "Contact Support",
-      description: "Get help from our technical support team",
-      icon: MessageCircle,
-      action: "contact-support",
-    },
-    {
-      title: "System Status",
-      description: "Check current system status and uptime",
-      icon: ExternalLink,
-      action: "system-status",
-    },
-    {
-      title: "API Documentation",
-      description: "Access comprehensive API documentation",
-      icon: Book,
-      action: "api-docs",
-    },
-    {
-      title: "Video Tutorials",
-      description: "Watch step-by-step video guides",
-      icon: ExternalLink,
-      action: "video-tutorials",
-    },
+    { id: 1, title: "Admin Dashboard Overview", category: "getting-started", description: "Learn about the main features and navigation of the admin dashboard", lastUpdated: "2024-01-20", views: 245 },
+    { id: 2, title: "Managing User Accounts", category: "user-management", description: "How to view, edit, suspend, and manage user accounts", lastUpdated: "2024-01-18", views: 189 },
+    { id: 3, title: "Configuring Platform Settings", category: "technical", description: "Step-by-step guide to configure platform-wide settings", lastUpdated: "2024-01-15", views: 156 },
+    { id: 4, title: "Host Verification Process", category: "user-management", description: "Understanding and managing the host verification workflow", lastUpdated: "2024-01-12", views: 203 },
+    { id: 5, title: "Payment System Troubleshooting", category: "payments", description: "Common payment issues and how to resolve them", lastUpdated: "2024-01-10", views: 134 },
   ]
 
   const filteredArticles = helpArticles.filter((article) => {
@@ -97,9 +34,11 @@ const AdminHelp = () => {
     return matchesSearch && matchesCategory
   })
 
-  const handleQuickAction = (action) => {
-    console.log(`Quick action: ${action}`)
-  }
+  const faqList = [
+    { q: "How do I verify a host?", a: "Go to Hosts page, open the host entry, and use Verify action. You can bulk-verify from the Hosts list." },
+    { q: "How do I export data?", a: "Use the Export button on each page. It downloads the filtered rows as a CSV." },
+    { q: "Why can't I edit a booking status?", a: "Ensure your backend permits status transitions and CORS is configured correctly." },
+  ]
 
   return (
     <div className="admin-help">
@@ -123,116 +62,92 @@ const AdminHelp = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="quick-actions-section">
-          <h2>Quick Actions</h2>
-          <div className="quick-actions-grid">
-            {quickActions.map((action, index) => (
-              <div key={index} className="quick-action-card" onClick={() => handleQuickAction(action.action)}>
-                <div className="action-icon">
-                  <action.icon size={24} />
-                </div>
-                <div className="action-content">
-                  <h3>{action.title}</h3>
-                  <p>{action.description}</p>
-                </div>
-                <ExternalLink size={16} className="action-arrow" />
-              </div>
-            ))}
+        {/* Search */}
+        <div className="help-search">
+          <h2>How can we help?</h2>
+          <p>Search our knowledge base for quick answers</p>
+          <div className="search-bar">
+            <Search size={20} />
+            <input
+              type="text"
+              placeholder="Search help articles..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
 
-        {/* Help Content */}
-        <div className="help-content">
-          <div className="help-sidebar">
-            <div className="search-section">
-              <div className="search-bar">
-                <Search size={20} />
-                <input
-                  type="text"
-                  placeholder="Search help articles..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="categories-section">
-              <h3>Categories</h3>
-              <div className="categories-list">
-                {helpCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    className={`category-item ${activeCategory === category.id ? "active" : ""}`}
-                    onClick={() => setActiveCategory(category.id)}
-                  >
-                    <span className="category-name">{category.name}</span>
-                    <span className="category-count">{category.count}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="contact-section">
-              <h3>Need More Help?</h3>
-              <div className="contact-options">
-                <div className="contact-item">
-                  <Mail size={16} />
-                  <div>
-                    <div className="contact-label">Email Support</div>
-                    <div className="contact-value">admin@fliits.com</div>
-                  </div>
+        {/* Categories */}
+        <div className="help-categories">
+          {helpCategories.map((cat) => (
+            <div key={cat.id} className="category-card" onClick={() => setActiveCategory(cat.id)}>
+              <div className="category-header">
+                <div className={`category-icon ${cat.iconClass}`}>
+                  <HelpCircle size={24} />
                 </div>
-                <div className="contact-item">
-                  <Phone size={16} />
-                  <div>
-                    <div className="contact-label">Phone Support</div>
-                    <div className="contact-value">+1 (555) 123-4567</div>
-                  </div>
+                <div className="category-title">
+                  <h3>{cat.name}</h3>
+                  <p>Browse articles in this category</p>
                 </div>
               </div>
+              <div className="article-count">{cat.count} articles</div>
             </div>
+          ))}
+        </div>
+
+        {/* Popular Articles */}
+        <div className="popular-articles">
+          <div className="section-header">
+            <h3>Popular Articles</h3>
+            <span className="view-all" onClick={() => setActiveCategory("all")}>View all</span>
           </div>
-
-          <div className="help-main">
-            <div className="articles-header">
-              <h2>
-                {activeCategory === "all"
-                  ? "All Articles"
-                  : helpCategories.find((cat) => cat.id === activeCategory)?.name}
-              </h2>
-              <p>{filteredArticles.length} articles found</p>
-            </div>
-
-            <div className="articles-list">
-              {filteredArticles.map((article) => (
-                <div key={article.id} className="article-card">
-                  <div className="article-icon">
-                    <HelpCircle size={20} />
-                  </div>
-                  <div className="article-content">
-                    <h3>{article.title}</h3>
-                    <p>{article.description}</p>
-                    <div className="article-meta">
-                      <span>Updated: {article.lastUpdated}</span>
-                      <span>•</span>
-                      <span>{article.views} views</span>
-                    </div>
-                  </div>
-                  <div className="article-action">
-                    <ExternalLink size={16} />
+          <ul className="articles-list">
+            {filteredArticles.slice(0, 5).map((article) => (
+              <li key={article.id} className="article-item">
+                <div className="article-info">
+                  <div className="article-title">{article.title}</div>
+                  <div className="article-meta">
+                    <span className="article-category">{article.category.replace("-", " ")}</span>
+                    <span>Updated: {article.lastUpdated}</span>
+                    <span className="article-views">{article.views} views</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                <Book size={16} />
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            {filteredArticles.length === 0 && (
-              <div className="no-results">
-                <HelpCircle size={48} />
-                <h3>No articles found</h3>
-                <p>Try adjusting your search terms or browse different categories</p>
-              </div>
-            )}
+        {/* FAQ */}
+        <div className="faq-section">
+          <h3>Frequently Asked Questions</h3>
+          <ul className="faq-list">
+            {faqList.map((f, idx) => (
+              <li key={idx} className="faq-item">
+                <div className="faq-question">
+                  <span>{f.q}</span>
+                  <span className="faq-toggle">▼</span>
+                </div>
+                <div className="faq-answer">{f.a}</div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Contact Support */}
+        <div className="contact-support">
+          <h3>Need more help?</h3>
+          <p>Contact our support team and we’ll get back to you as soon as possible.</p>
+          <div className="contact-actions">
+            <button className="btn-white">
+              <Mail size={16} /> Email Support
+            </button>
+            <button className="btn-white">
+              <Phone size={16} /> Call Support
+            </button>
+            <button className="btn-white">
+              <MessageCircle size={16} /> Chat with Support
+            </button>
           </div>
         </div>
       </div>

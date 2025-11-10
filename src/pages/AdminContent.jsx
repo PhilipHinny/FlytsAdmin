@@ -3,7 +3,7 @@
 import { useState } from "react"
 import React from "react"
 
-import { Search, Filter, MoreVertical, Eye, Edit, Plus, FileText, ImageIcon, Video } from "lucide-react"
+import { Search, Filter, MoreVertical, Eye, Edit, Plus, FileText, ImageIcon, Video, QuoteIcon } from "lucide-react"
 import AdminSidebar from "../components/AdminSidebar"
 import "../styles/AdminContent.css"
 
@@ -134,15 +134,21 @@ const AdminContent = () => {
 
         <div className="content-tabs">
           <button className={`tab ${activeTab === "pages" ? "active" : ""}`} onClick={() => setActiveTab("pages")}>
-            <FileText size={20} />
+            <FileText size={20} 
+            className="content-icon pages"
+            />
             Pages
           </button>
           <button className={`tab ${activeTab === "faqs" ? "active" : ""}`} onClick={() => setActiveTab("faqs")}>
-            <FileText size={20} />
+            <QuoteIcon size={20} 
+            className="content-icon FAQ"
+            />
             FAQs
           </button>
           <button className={`tab ${activeTab === "media" ? "active" : ""}`} onClick={() => setActiveTab("media")}>
-            <ImageIcon size={20} />
+            <ImageIcon size={20} 
+            className="content-icon media"
+            />
             Media
           </button>
         </div>

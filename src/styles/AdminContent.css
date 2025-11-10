@@ -207,6 +207,49 @@
   text-decoration: underline;
 }
 
+.content-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.content-tabs button{
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.content-icon.pages {
+  color: #10b981;
+  width: 20px;
+  height: 20px;
+}
+
+.content-icon.FAQ {
+  color: #3b82f6;
+  width: 20px;
+  height: 20px;
+}
+
+.content-icon.media {
+  color: #f59e0b;
+  width: 20px;
+  height: 20px;
+}
+
+.content-controls{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
 .content-table {
   width: 100%;
   border-collapse: collapse;

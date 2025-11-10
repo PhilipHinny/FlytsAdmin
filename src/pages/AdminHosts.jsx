@@ -1,73 +1,182 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import React from "react"
 
 import { Search, Filter, MoreVertical, Eye, Edit, CheckCircle, XCircle, Star } from "lucide-react"
 import AdminSidebar from "../components/AdminSidebar"
 import "../styles/AdminHosts.css"
+import { normalizeProfilePicture } from "../lib/utils"
+import Modal from "../components/Modal"
 
 const AdminHosts = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
-  const [hosts, setHosts] = useState([
-    {
-      id: 1,
-      name: "Sarah Wilson",
-      email: "sarah.wilson@email.com",
-      phone: "+1 234 567 8900",
-      status: "Active",
-      joinDate: "2024-01-15",
-      totalCars: 3,
-      totalEarnings: 12450,
-      rating: 4.8,
-      totalTrips: 89,
-      avatar: "/placeholder.svg?height=40&width=40",
-      verified: true,
-      pendingVerification: false,
-    },
-    {
-      id: 2,
-      name: "David Brown",
-      email: "david.brown@email.com",
-      phone: "+1 234 567 8901",
-      status: "Pending",
-      joinDate: "2024-01-20",
-      totalCars: 1,
-      totalEarnings: 0,
-      rating: 0,
-      totalTrips: 0,
-      avatar: "/placeholder.svg?height=40&width=40",
-      verified: false,
-      pendingVerification: true,
-    },
-    {
-      id: 3,
-      name: "Lisa Garcia",
-      email: "lisa.garcia@email.com",
-      phone: "+1 234 567 8902",
-      status: "Suspended",
-      joinDate: "2024-01-05",
-      totalCars: 2,
-      totalEarnings: 5600,
-      rating: 3.2,
-      totalTrips: 34,
-      avatar: "/placeholder.svg?height=40&width=40",
-      verified: true,
-      pendingVerification: false,
-    },
-  ])
+  const [hosts, setHosts] = useState([])
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
+
+  const tryApi = async (method, path, body) => {
+    const doReq = async (suffix) => {
+      const res = await fetch(`${apiBaseUrl}${suffix}`, {
+        method,
+        headers: body ? { "Content-Type": "application/json" } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      })
+      if (!res.ok) throw new Error(`${method} ${suffix} failed: ${res.status}`)
+      if (res.status === 204) return null
+      return res.json()
+    }
+    return await doReq(`/api${path}`)
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const fetchHosts = async () => {
+      try {
+        const tryFetch = async (path) => {
+          const res = await fetch(`${apiBaseUrl}${path}`, { signal: controller.signal })
+          if (!res.ok) throw new Error(`Failed: ${res.status}`)
+          return res.json()
+        }
+        const data = await tryFetch("/api/admin/hosts")
+        const normalized = Array.isArray(data)
+          ? data.map((h) => {
+              const avatarUrl = h.avatar || h.profile_picture || h.profilePictureUrl || h.profile_picture_url || h.photoURL || ""
+              return {
+                id: h.id,
+                name: h.name || "Unknown",
+                email: h.email || "",
+                phone: h.phone || "",
+                status: h.status || "",
+                joinDate: h.joinDate || "",
+                totalCars: h.totalCars ?? 0,
+                totalEarnings: h.totalEarnings ?? 0,
+                rating: h.rating ?? 0,
+                totalTrips: h.totalTrips ?? 0,
+                avatar: avatarUrl || "/placeholder.svg",
+                is_verified: Boolean(h.is_verified),
+                verification_status: h.verification_status,
+              }
+            })
+          : []
+        setHosts(normalized)
+      } catch (e) {
+        if (e.name !== "AbortError") console.error("Error fetching hosts:", e)
+      }
+    }
+    fetchHosts()
+    return () => controller.abort()
+  }, [])
 
   const filteredHosts = hosts.filter((host) => {
     const matchesSearch =
-      host.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      host.email.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filterStatus === "all" || host.status.toLowerCase() === filterStatus
+      (host.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (host.email || "").toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filterStatus === "all" || (host.status || "").toLowerCase() === filterStatus
     return matchesSearch && matchesFilter
   })
 
   const handleHostAction = (action, hostId) => {
+    if (action === "view") {
+      const host = hosts.find((h) => h.id === hostId)
+      if (host) {
+        setSelectedHost(host)
+        setIsViewOpen(true)
+      }
+      return
+    }
     console.log(`${action} host ${hostId}`)
+  }
+
+  const handleImgError = (e) => {
+    const target = e.currentTarget
+    if (target.dataset.fallbackApplied) return
+    target.dataset.fallbackApplied = "1"
+    target.src = "/Flyts logo.png"
+  }
+
+  const exportCsv = () => {
+    const rows = filteredHosts.map((h) => ({
+      id: h.id,
+      name: h.name,
+      email: h.email,
+      phone: h.phone,
+      status: h.status,
+      joinDate: h.joinDate,
+      totalCars: h.totalCars,
+      rating: h.rating,
+      totalTrips: h.totalTrips,
+      totalEarnings: h.totalEarnings,
+      is_verified: h.is_verified,
+      verification_status: h.verification_status,
+    }))
+    const headers = [
+      "Host ID",
+      "Name",
+      "Email",
+      "Phone",
+      "Status",
+      "Join Date",
+      "Total Cars",
+      "Rating",
+      "Total Trips",
+      "Total Earnings (Ksh)",
+      "Verified",
+      "Pending Verification",
+    ]
+    const escapeCsv = (val) => {
+      const s = val == null ? "" : String(val)
+      if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'
+      return s
+    }
+    const csv = [headers.join(","), ...rows.map((r) => Object.values(r).map(escapeCsv).join(",")).join("\n")]
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    const dateStr = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")
+    a.download = `flyts-hosts-${dateStr}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const verifyPending = async () => {
+    const pending = filteredHosts.filter((h) => h.pendingVerification)
+    if (pending.length === 0) return
+    try {
+      setIsVerifying(true)
+      const results = await Promise.allSettled(
+        pending.map((h) =>
+          tryApi("PUT", `/admin/hosts/${h.id}`, { verified: true, pendingVerification: false, status: "active" })
+        )
+      )
+      const succeededIds = new Set(
+        results
+          .map((r, idx) => (r.status === "fulfilled" ? pending[idx].id : null))
+          .filter(Boolean)
+      )
+      if (succeededIds.size > 0) {
+        setHosts((prev) =>
+          prev.map((h) =>
+            succeededIds.has(h.id)
+              ? { ...h, verified: true, pendingVerification: false, status: h.status || "Active" }
+              : h
+          )
+        )
+      }
+      const failed = results.filter((r) => r.status === "rejected").length
+      if (failed > 0) alert(`${failed} host(s) failed to verify.`)
+    } catch (e) {
+      console.error(e)
+      alert("Verification failed.")
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
   return (
@@ -81,8 +190,8 @@ const AdminHosts = () => {
             <p>Manage all hosts and their verification status</p>
           </div>
           <div className="header-actions">
-            <button className="btn-secondary">Export Hosts</button>
-            <button className="btn-primary">Verify Pending</button>
+            <button className="btn-secondary" onClick={exportCsv}>Export Hosts</button>
+            <button className="btn-primary" onClick={verifyPending} disabled={isVerifying}>{isVerifying ? "Verifying..." : "Verify Pending"}</button>
           </div>
         </div>
 
@@ -114,12 +223,14 @@ const AdminHosts = () => {
           <table>
             <thead>
               <tr>
-                <th>Host</th>
+                <th>Host ID</th>
+                <th>Name</th>
                 <th>Contact</th>
                 <th>Status</th>
                 <th>Cars</th>
                 <th>Performance</th>
-                <th>Earnings</th>
+                <th>Earnings (Ksh)</th>
+                <th>Verification Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -127,14 +238,13 @@ const AdminHosts = () => {
               {filteredHosts.map((host) => (
                 <tr key={host.id}>
                   <td>
+                    <div className="host-id" title={host.id}>{(host.id || "").slice(0, 4)}…</div>
+                  </td>
+                  <td>
                     <div className="host-info">
-                      <img src={host.avatar || "/placeholder.svg"} alt={host.name} />
-                      <div>
-                        <div className="host-name">
-                          {host.name}
-                          {host.verified && <span className="verified-badge">✓</span>}
-                        </div>
-                        <div className="host-id">Host ID: {host.id}</div>
+                      <div className="host-name">
+                        {host.name}
+                        {host.verified && <span className="verified-badge">✓</span>}
                       </div>
                     </div>
                   </td>
@@ -148,9 +258,7 @@ const AdminHosts = () => {
                     <span className={`status ${host.status.toLowerCase()}`}>{host.status}</span>
                   </td>
                   <td>
-                    <div className="cars-info">
-                      <div>{host.totalCars} cars</div>
-                    </div>
+                    <div className="cars-info">{host.totalCars} cars</div>
                   </td>
                   <td>
                     <div className="performance-info">
@@ -159,27 +267,20 @@ const AdminHosts = () => {
                         {host.rating > 0 ? host.rating : "N/A"}
                         <div className="trips">{host.totalTrips} trips</div>
                       </div>
-                      
                     </div>
                   </td>
                   <td>
-                    <div className="earnings">${host.totalEarnings.toLocaleString()}</div>
+                    <div className="earnings">Ksh {Number(host.totalEarnings).toLocaleString()}</div>
+                  </td>
+                  <td>
+                    <span className={`status ${host.verification_status.toLowerCase()}`}>{host.verification_status}</span>
                   </td>
                   <td>
                     <div className="actions">
                       <button onClick={() => handleHostAction("view", host.id)}>
                         <Eye size={16} />
                       </button>
-                      {host.pendingVerification && (
-                        <>
-                          <button className="approve-btn" onClick={() => handleHostAction("approve", host.id)}>
-                            <CheckCircle size={16} />
-                          </button>
-                          <button className="reject-btn" onClick={() => handleHostAction("reject", host.id)}>
-                            <XCircle size={16} />
-                          </button>
-                        </>
-                      )}
+                      
                       <button onClick={() => handleHostAction("edit", host.id)}>
                         <Edit size={16} />
                       </button>
@@ -193,6 +294,38 @@ const AdminHosts = () => {
             </tbody>
           </table>
         </div>
+
+        <Modal
+          isOpen={isViewOpen && !!selectedHost}
+          onClose={() => {
+            setIsViewOpen(false)
+            setSelectedHost(null)
+          }}
+          title="Host Details"
+          footer={<button className="btn-secondary" onClick={() => { setIsViewOpen(false); setSelectedHost(null) }}>Close</button>}
+        >
+          {selectedHost && (
+            <div className="modal-body">
+              <img
+                src={normalizeProfilePicture(selectedHost.avatar) || "/placeholder.svg"}
+                onError={handleImgError}
+                alt="host profile"
+                className="modal-avatar"
+              />
+              <div>
+                <div><strong>Host ID:</strong> {selectedHost.id}</div>
+                <div><strong>Name:</strong> {selectedHost.name}</div>
+                <div><strong>Email:</strong> {selectedHost.email || "-"}</div>
+                <div><strong>Phone:</strong> {selectedHost.phone || "-"}</div>
+                <div><strong>Status:</strong> {selectedHost.status}</div>
+                <div><strong>Total Cars:</strong> {selectedHost.totalCars}</div>
+                <div><strong>Trips:</strong> {selectedHost.totalTrips}</div>
+                <div><strong>Earnings (Ksh):</strong> {Number(selectedHost.totalEarnings).toLocaleString()}</div>
+                <div><strong>Verification Status:</strong> {selectedHost.verification_status}</div>
+              </div>
+            </div>
+          )}
+        </Modal>
       </div>
     </div>
   )

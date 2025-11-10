@@ -1,71 +1,167 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import React from "react"
+import { useNavigate } from "react-router-dom"
 import { Users, Car, Calendar, DollarSign, AlertTriangle, BarChart3, Activity, Shield, Bell } from "lucide-react"
 import AdminSidebar from "../components/AdminSidebar"
 import "../styles/AdminDashboard.css"
+import { fetchWithAuth } from "../lib/utils"
 
 const AdminDashboard = () => {
+  const navigate = useNavigate()
   const [stats, setStats] = useState({
-    totalUsers: 15420,
-    totalHosts: 3240,
-    totalRenters: 12180,
-    totalCars: 8950,
-    activeCars: 7230,
-    totalBookings: 45680,
-    activeTrips: 234,
-    totalRevenue: 2450000,
-    monthlyRevenue: 185000,
-    pendingVerifications: 45,
-    reportedIssues: 12,
-    newSignups: 156,
+    totalUsers: 0,
+    totalHosts: 0,
+    totalRenters: 0,
+    totalCars: 0,
+    activeCars: 0,
+    totalBookings: 0,
+    activeTrips: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    pendingVerifications: 0,
+    reportedIssues: 0,
+    newSignups: 0,
   })
 
-  const [recentActivities, setRecentActivities] = useState([
-    {
-      id: 1,
-      type: "booking",
-      message: "New booking created by John Doe",
-      time: "2 minutes ago",
-      status: "success",
-    },
-    {
-      id: 2,
-      type: "verification",
-      message: "Host verification pending for BMW X5",
-      time: "15 minutes ago",
-      status: "warning",
-    },
-    {
-      id: 3,
-      type: "payment",
-      message: "Payment of $450 processed successfully",
-      time: "1 hour ago",
-      status: "success",
-    },
-    {
-      id: 4,
-      type: "issue",
-      message: "Damage report submitted for Trip #FL12345",
-      time: "2 hours ago",
-      status: "error",
-    },
-    {
-      id: 5,
-      type: "user",
-      message: "25 new users registered today",
-      time: "3 hours ago",
-      status: "info",
-    },
-  ])
+  const [recentActivities, setRecentActivities] = useState([])
+  const [quickActions, setQuickActions] = useState([])
+  const [notifications, setNotifications] = useState([])
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL
 
-  const [quickActions] = useState([
-    { id: 1, title: "Verify Pending Cars", count: 23, icon: Car, color: "orange" },
-    { id: 2, title: "Review Reports", count: 12, icon: AlertTriangle, color: "red" },
-    { id: 3, title: "Process Refunds", count: 8, icon: DollarSign, color: "blue" },
-    { id: 4, title: "User Verifications", count: 15, icon: Shield, color: "green" },
-  ])
+  const adminName = (typeof window !== "undefined" && localStorage.getItem("flyts_admin_name")) || "Admin"
+
+  const iconMap = {
+    Car,
+    AlertTriangle,
+    DollarSign,
+    Shield,
+  }
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const fetchDashboard = async () => {
+      try {
+        const tryFetch = async (path) => {
+          const res = await fetch(`${apiBaseUrl}${path}`, { signal: controller.signal })
+          if (!res.ok) throw new Error(`Failed: ${res.status}`)
+          return res.json()
+        }
+        const data = await tryFetch("/api/admin/dashboard")
+        if (data?.stats) setStats(data.stats)
+        if (Array.isArray(data?.recentActivities)) setRecentActivities(data.recentActivities)
+        if (Array.isArray(data?.quickActions)) setQuickActions(data.quickActions)
+      } catch (e) {
+        if (e.name !== "AbortError") console.error("Error fetching dashboard:", e)
+      }
+    }
+    fetchDashboard()
+    return () => controller.abort()
+  }, [])
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth("/admin/notifications", { method: "GET" })
+      if (!res.ok) throw new Error("Failed to load notifications")
+      const data = await res.json()
+      const list = Array.isArray(data?.notifications) ? data.notifications : Array.isArray(data) ? data : []
+      const filtered = list.filter((n) => {
+        const t = (n.type || n.category || "").toLowerCase()
+        const msg = (n.message || n.title || "").toLowerCase()
+        const isVerification = t.includes("verification") || msg.includes("verification") || msg.includes("approved") || msg.includes("verified")
+        const mentionsEntity = msg.includes("profile") || msg.includes("car") || msg.includes("user") || (n.entity || "").toLowerCase().match(/profile|car|user/)
+        const alreadyHandled = Boolean(n.handled || n.resolved || (n.status || "").toLowerCase().includes("handled") || (n.status || "").toLowerCase().includes("resolved"))
+        return isVerification && mentionsEntity && !alreadyHandled
+      })
+      setNotifications(filtered.map((n) => ({
+        id: n.id || n._id || crypto.randomUUID(),
+        message: n.message || n.title || "Notification",
+        createdAt: n.createdAt || n.timestamp || new Date().toISOString(),
+        read: Boolean(n.read),
+        entityType: (n.entityType || n.entity || n.targetType || n.type || "").toString().toLowerCase(),
+        entityId: n.entityId || n.targetId || n.userId || n.carId || n.profileId || n.hostId || null,
+        carId: n.carId || n.car_id || null,
+        raw: n,
+      })))
+    } catch (_) {
+      setNotifications([])
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [fetchNotifications])
+
+  const hasUnread = notifications.some((n) => !n.read)
+
+  const openNotifications = async () => {
+    setIsNotifOpen((v) => !v)
+    if (hasUnread) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+      try {
+        await fetchWithAuth("/admin/notifications/read-all", { method: "POST" })
+      } catch (_) {}
+    }
+  }
+
+  const resolveEntityKind = (n) => {
+    const t = (n.entityType || "").toLowerCase()
+    if (t.includes("car")) return "car"
+    if (t.includes("user") || t.includes("profile")) return "user"
+    if (t.includes("host")) return "host"
+    const msg = (n.message || "").toLowerCase()
+    if (msg.includes("car")) return "car"
+    if (msg.includes("profile") || msg.includes("user")) return "user"
+    return null
+  }
+
+  const getCarIdFromNotification = (n) => {
+    return n.carId || n.entityId || n.raw?.car_id || n.raw?.carId || n.raw?.id || null
+  }
+
+  const handleVerification = async (n, approve) => {
+    const kind = resolveEntityKind(n)
+    const id = n.entityId
+    if (!kind || !id) {
+      alert("Missing entity information for this notification.")
+      return
+    }
+    try {
+      if (kind === "user") {
+        await fetchWithAuth(`/admin/users/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ verified: approve, verification_status: approve ? "approved" : "rejected" })
+        })
+      } else if (kind === "car") {
+        const carId = getCarIdFromNotification(n)
+        if (!carId) throw new Error("Missing carId")
+        const endpoint = `/admin/cars/${carId}/${approve ? "approve" : "deny"}`
+        try {
+          await fetchWithAuth(endpoint, { method: "POST" })
+        } catch (err) {
+          console.error("Car verification failed:", endpoint, err)
+          alert(`Request failed (likely 404). Please verify backend route: POST ${endpoint}`)
+          return
+        }
+      } else if (kind === "host") {
+        await fetchWithAuth(`/admin/hosts/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ verified: approve, pendingVerification: false, status: approve ? "active" : "suspended" })
+        })
+      }
+      setNotifications((prev) => prev.filter((x) => x.id !== n.id))
+      try {
+        await fetchWithAuth(`/admin/notifications/${n.id}`, { method: "DELETE" })
+      } catch (_) {}
+      await fetchNotifications()
+    } catch (e) {
+      alert("Failed to update verification status.")
+    }
+  }
 
   const getActivityIcon = (type) => {
     switch (type) {
@@ -84,6 +180,14 @@ const AdminDashboard = () => {
     }
   }
 
+  const handleQuickAction = (title) => {
+    const t = (title || "").toLowerCase()
+    if (t.includes("car")) return navigate("/cars")
+    if (t.includes("report")) return navigate("/reports")
+    if (t.includes("refund")) return navigate("/payments")
+    if (t.includes("user")) return navigate("/users")
+  }
+
   return (
     <div className="admin-dashboard">
       <AdminSidebar />
@@ -92,17 +196,39 @@ const AdminDashboard = () => {
         <div className="admin-header">
           <div className="header-left">
             <h1>Admin Dashboard</h1>
-            <p>Welcome back, Admin. Here's what's happening on FLIITS today.</p>
+            <p>Welcome back, {adminName}. Here's what's happening on FLYTS today.</p>
           </div>
-          <div className="header-right">
-            <button className="notification-btn">
+          <div className="header-right" style={{ position: "relative" }}>
+            <button className="notification-btn" onClick={openNotifications}>
               <Bell size={20} />
-              <span className="notification-badge">5</span>
+              {hasUnread ? <span className="notification-badge"></span> : null}
             </button>
-            <div className="admin-profile">
-              <img src="/placeholder.svg?height=40&width=40" alt="Admin" />
-              <span>Admin User</span>
-            </div>
+            {isNotifOpen && (
+              <div className="notifications-panel">
+                <div className="panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Notifications</span>
+                  <button className="action-btn" onClick={() => fetchNotifications()}>Reload</button>
+                </div>
+                {notifications.length === 0 ? (
+                  <div className="panel-empty">No notifications</div>
+                ) : (
+                  <ul className="panel-list">
+                    {notifications.slice(0, 10).map((n) => (
+                      <li key={n.id} className={`panel-item ${n.read ? '' : 'unread'}`}>
+                        <div className="item-message">{n.message}</div>
+                        <div className="item-time">{new Date(n.createdAt).toLocaleString()}</div>
+                        {(resolveEntityKind(n) && (n.entityId || n.carId || n.raw?.car_id || n.raw?.carId || n.raw?.id)) ? (
+                          <div className="item-actions">
+                            <button className="btn-approve" onClick={() => handleVerification(n, true)}>Approve</button>
+                            <button className="btn-reject" onClick={() => handleVerification(n, false)}>Reject</button>
+                          </div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -113,9 +239,9 @@ const AdminDashboard = () => {
               <Users size={24} />
             </div>
             <div className="stat-content">
-              <h3>{stats.totalUsers.toLocaleString()}</h3>
+              <h3>{Number(stats.totalUsers).toLocaleString()}</h3>
               <p>Total Users</p>
-              <span className="stat-change positive">+{stats.newSignups} this week</span>
+              <span className="stat-change positive">+{Number(stats.newSignups).toLocaleString()} this month</span>
             </div>
           </div>
 
@@ -124,9 +250,9 @@ const AdminDashboard = () => {
               <Car size={24} />
             </div>
             <div className="stat-content">
-              <h3>{stats.totalCars.toLocaleString()}</h3>
+              <h3>{Number(stats.totalCars).toLocaleString()}</h3>
               <p>Total Cars</p>
-              <span className="stat-change positive">{stats.activeCars.toLocaleString()} active</span>
+              <span className="stat-change positive">{Number(stats.activeCars).toLocaleString()} active</span>
             </div>
           </div>
 
@@ -135,9 +261,9 @@ const AdminDashboard = () => {
               <Calendar size={24} />
             </div>
             <div className="stat-content">
-              <h3>{stats.totalBookings.toLocaleString()}</h3>
+              <h3>{Number(stats.totalBookings).toLocaleString()}</h3>
               <p>Total Bookings</p>
-              <span className="stat-change positive">{stats.activeTrips} active trips</span>
+              <span className="stat-change positive">{Number(stats.activeTrips).toLocaleString()} active trips</span>
             </div>
           </div>
 
@@ -146,9 +272,9 @@ const AdminDashboard = () => {
               <DollarSign size={24} />
             </div>
             <div className="stat-content">
-              <h3>${stats.totalRevenue.toLocaleString()}</h3>
+              <h3>Ksh {Number(stats.totalRevenue).toLocaleString()}</h3>
               <p>Total Revenue</p>
-              <span className="stat-change positive">${stats.monthlyRevenue.toLocaleString()} this month</span>
+              <span className="stat-change positive">Ksh {Number(stats.monthlyRevenue).toLocaleString()} this month</span>
             </div>
           </div>
         </div>
@@ -157,18 +283,21 @@ const AdminDashboard = () => {
         <div className="quick-actions">
           <h2>Quick Actions</h2>
           <div className="actions-grid">
-            {quickActions.map((action) => (
-              <div key={action.id} className={`action-card ${action.color}`}>
-                <div className="action-icon">
-                  <action.icon size={24} />
+            {quickActions.map((action) => {
+              const IconCmp = iconMap[action.icon] || Activity
+              return (
+                <div key={action.id} className={`action-card ${action.color}`}>
+                  <div className="action-icon">
+                    <IconCmp size={24} />
+                  </div>
+                  <div className="action-content">
+                    <h3>{Number(action.count).toLocaleString()}</h3>
+                    <p>{action.title}</p>
+                  </div>
+                  <button className="action-btn" onClick={() => handleQuickAction(action.title)}>View All</button>
                 </div>
-                <div className="action-content">
-                  <h3>{action.count}</h3>
-                  <p>{action.title}</p>
-                </div>
-                <button className="action-btn">View All</button>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
 
@@ -188,16 +317,16 @@ const AdminDashboard = () => {
               <p>Revenue chart would be displayed here</p>
               <div className="chart-stats">
                 <div className="chart-stat">
-                  <span className="stat-label">This Week</span>
-                  <span className="stat-value">$45,230</span>
+                  <span className="stat-label">This Month</span>
+                  <span className="stat-value">Ksh {Number(stats.monthlyRevenue).toLocaleString()}</span>
                 </div>
                 <div className="chart-stat">
-                  <span className="stat-label">Last Week</span>
-                  <span className="stat-value">$38,940</span>
+                  <span className="stat-label">Total Revenue</span>
+                  <span className="stat-value">Ksh {Number(stats.totalRevenue).toLocaleString()}</span>
                 </div>
                 <div className="chart-stat">
-                  <span className="stat-label">Growth</span>
-                  <span className="stat-value positive">+16.2%</span>
+                  <span className="stat-label">Active Trips</span>
+                  <span className="stat-value positive">+{Number(stats.activeTrips).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -206,7 +335,7 @@ const AdminDashboard = () => {
           <div className="activity-section">
             <div className="section-header">
               <h2>Recent Activities</h2>
-              <button className="view-all-btn">View All</button>
+              <button className="view-all-btn" onClick={() => navigate("/bookings")}>View All</button>
             </div>
             <div className="activities-list">
               {recentActivities.map((activity) => (

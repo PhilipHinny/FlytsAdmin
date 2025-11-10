@@ -1,7 +1,7 @@
 .admin-help {
   display: flex;
   min-height: 100vh;
-  background: #f8fafc;
+  background: var(--color-gray-100);
 }
 
 .admin-content {
@@ -25,12 +25,12 @@
 .header-left h1 {
   font-size: 32px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0 0 8px 0;
 }
 
 .header-left p {
-  color: #64748b;
+  color: var(--color-gray-500);
   margin: 0;
   font-size: 16px;
 }
@@ -46,17 +46,17 @@
   gap: 8px;
   padding: 10px 16px;
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 8px;
-  color: #475569;
+  color: var(--color-gray-500);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
 }
 
 .btn-primary {
@@ -64,8 +64,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #fbbf24;
-  border: 1px solid #fbbf24;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
   border-radius: 8px;
   color: white;
   font-weight: 500;
@@ -74,8 +74,8 @@
 }
 
 .btn-primary:hover {
-  background: #f59e0b;
-  border-color: #f59e0b;
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 /* Help Categories */
@@ -88,7 +88,7 @@
 
 .category-card {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 12px;
   padding: 24px;
   cursor: pointer;
@@ -96,8 +96,8 @@
 }
 
 .category-card:hover {
-  border-color: #fbbf24;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(var(--color-gray-900-rgb), 0.05);
 }
 
 .category-header {
@@ -118,46 +118,46 @@
 }
 
 .category-icon.getting-started {
-  background: #10b981;
+  background: var(--color-green-500);
 }
 
 .category-icon.user-management {
-  background: #3b82f6;
+  background: var(--color-blue-500);
 }
 
 .category-icon.payments {
-  background: #8b5cf6;
+  background: var(--color-purple-500);
 }
 
 .category-icon.technical {
-  background: #f59e0b;
+  background: var(--color-yellow-500);
 }
 
 .category-title h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0 0 4px 0;
 }
 
 .category-title p {
-  color: #64748b;
+  color: var(--color-gray-500);
   margin: 0;
   font-size: 14px;
 }
 
 .article-count {
-  color: #64748b;
+  color: var(--color-gray-500);
   font-size: 12px;
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--color-gray-100);
 }
 
 /* Search Section */
 .help-search {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 12px;
   padding: 32px;
   margin-bottom: 32px;
@@ -167,12 +167,12 @@
 .help-search h2 {
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0 0 12px 0;
 }
 
 .help-search p {
-  color: #64748b;
+  color: var(--color-gray-500);
   margin: 0 0 24px 0;
   font-size: 16px;
 }
@@ -188,13 +188,13 @@
   left: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #94a3b8;
+  color: var(--color-gray-500);
 }
 
 .search-bar input {
   width: 100%;
   padding: 16px 16px 16px 48px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 12px;
   font-size: 16px;
   background: white;
@@ -203,14 +203,14 @@
 
 .search-bar input:focus {
   outline: none;
-  border-color: #fbbf24;
-  box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
 }
 
 /* Popular Articles */
 .popular-articles {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
@@ -226,12 +226,12 @@
 .section-header h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0;
 }
 
 .view-all {
-  color: #fbbf24;
+  color: var(--color-primary);
   font-size: 14px;
   font-weight: 500;
   text-decoration: none;
@@ -253,7 +253,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-gray-100);
 }
 
 .article-item:last-child {
@@ -266,7 +266,7 @@
 
 .article-title {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0 0 4px 0;
   font-size: 14px;
 }
@@ -275,13 +275,13 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  color: #64748b;
+  color: var(--color-gray-500);
   font-size: 12px;
 }
 
 .article-category {
   padding: 2px 8px;
-  background: #f1f5f9;
+  background: var(--color-gray-100);
   border-radius: 12px;
   font-size: 10px;
   font-weight: 500;
@@ -292,14 +292,14 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #64748b;
+  color: var(--color-gray-500);
   font-size: 12px;
 }
 
 /* FAQ Section */
 .faq-section {
   background: white;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--color-gray-200);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 32px;
@@ -308,7 +308,7 @@
 .faq-section h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-gray-900);
   margin: 0 0 20px 0;
 }
 
@@ -319,7 +319,7 @@
 }
 
 .faq-item {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--color-gray-100);
 }
 
 .faq-item:last-child {
@@ -333,13 +333,13 @@
   padding: 16px 0;
   cursor: pointer;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-gray-900);
   font-size: 14px;
 }
 
 .faq-answer {
   padding: 0 0 16px 0;
-  color: #64748b;
+  color: var(--color-gray-500);
   font-size: 14px;
   line-height: 1.6;
   display: none;
@@ -350,7 +350,7 @@
 }
 
 .faq-toggle {
-  color: #64748b;
+  color: var(--color-gray-500);
   transition: transform 0.2s ease;
 }
 
@@ -360,7 +360,7 @@
 
 /* Contact Support */
 .contact-support {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   border-radius: 12px;
   padding: 32px;
   text-align: center;
@@ -393,14 +393,14 @@
   background: white;
   border: none;
   border-radius: 8px;
-  color: #1e293b;
+  color: var(--color-gray-900);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-white:hover {
-  background: #f8fafc;
+  background: var(--color-gray-100);
 }
 
 /* Mobile Responsive */

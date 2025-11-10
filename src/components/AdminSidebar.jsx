@@ -39,21 +39,18 @@ const AdminSidebar = () => {
       label: "Users",
       icon: Users,
       path: "/users", // changed from "/admin/users"
-      badge: "1.2k",
     },
     {
       id: "hosts",
       label: "Hosts",
       icon: Shield,
       path: "/hosts", // changed from "/admin/hosts"
-      badge: "324",
     },
     {
       id: "cars",
       label: "Cars",
       icon: Car,
       path: "/cars", // changed from "/admin/cars"
-      badge: "45",
     },
     {
       id: "bookings",
@@ -72,13 +69,6 @@ const AdminSidebar = () => {
       label: "Reports",
       icon: AlertTriangle,
       path: "/reports", // changed from "/admin/reports"
-      badge: "12",
-    },
-    {
-      id: "messages",
-      label: "Messages",
-      icon: MessageSquare,
-      path: "/messages", // changed from "/admin/messages"
     },
     {
       id: "analytics",
@@ -91,6 +81,12 @@ const AdminSidebar = () => {
       label: "Content",
       icon: FileText,
       path: "/content", // changed from "/admin/content"
+    },
+    {
+      id: "employees",
+      label: "Employees",
+      icon: Users,
+      path: "/employees",
     },
     {
       id: "settings",
@@ -120,7 +116,7 @@ const AdminSidebar = () => {
       <div className="sidebar-header">
         <div className="logo-section">
           <div className="logo">
-            <span className="logo-text">FLIITS</span>
+            <span className="logo-text">FL<span style={{color:"black"}}>Y</span>TS</span>
             <span className="logo-admin">Admin</span>
           </div>
         </div>
@@ -144,7 +140,7 @@ const AdminSidebar = () => {
               {!isCollapsed && (
                 <>
                   <span className="nav-label">{item.label}</span>
-                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                  {/* {item.badge && <span className="nav-badge">{item.badge}</span>} */}
                 </>
               )}
             </button>

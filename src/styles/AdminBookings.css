@@ -224,7 +224,7 @@
 
 .bookings-table th,
 .bookings-table td {
-  padding: 16px 20px;
+  padding: 12px 10px;
   text-align: center;
   border-bottom: 1px solid #f1f5f9;
 }
@@ -240,7 +240,7 @@
 
 .bookings-table td {
   color: #64748b;
-  font-size: 14px;
+  font-size: 12px;
   text-align: center;
 }
 

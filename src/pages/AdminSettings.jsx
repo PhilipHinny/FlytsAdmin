@@ -68,6 +68,14 @@ const AdminSettings = () => {
     // API call to save settings
   }
 
+  const navItems = [
+    { id: "general", icon: Globe, label: "General" },
+    { id: "platform", icon: Car, label: "Platform" },
+    { id: "notifications", icon: Bell, label: "Notifications" },
+    { id: "security", icon: Shield, label: "Security" },
+    { id: "payments", icon: CreditCard, label: "Payments" },
+  ]
+
   return (
     <div className="admin-settings">
       <AdminSidebar />
@@ -79,7 +87,7 @@ const AdminSettings = () => {
             <p>Configure platform settings and preferences</p>
           </div>
           <div className="header-actions">
-            <button className="btn-secondary">
+            <button className="btn-secondary" onClick={() => window.location.reload()}>
               <RefreshCw size={20} />
               Reset
             </button>
@@ -90,85 +98,72 @@ const AdminSettings = () => {
           </div>
         </div>
 
-        <div className="settings-container">
-          <div className="settings-tabs">
-            <button
-              className={`tab ${activeTab === "general" ? "active" : ""}`}
-              onClick={() => setActiveTab("general")}
-            >
-              <Globe size={20} />
-              General
-            </button>
-            <button
-              className={`tab ${activeTab === "platform" ? "active" : ""}`}
-              onClick={() => setActiveTab("platform")}
-            >
-              <Car size={20} />
-              Platform
-            </button>
-            <button
-              className={`tab ${activeTab === "notifications" ? "active" : ""}`}
-              onClick={() => setActiveTab("notifications")}
-            >
-              <Bell size={20} />
-              Notifications
-            </button>
-            <button
-              className={`tab ${activeTab === "security" ? "active" : ""}`}
-              onClick={() => setActiveTab("security")}
-            >
-              <Shield size={20} />
-              Security
-            </button>
-            <button
-              className={`tab ${activeTab === "payments" ? "active" : ""}`}
-              onClick={() => setActiveTab("payments")}
-            >
-              <CreditCard size={20} />
-              Payments
-            </button>
-          </div>
+        <div className="settings-layout">
+          <aside className="settings-nav">
+            <h3>Settings</h3>
+            <ul className="nav-list">
+              {navItems.map((item) => (
+                <li key={item.id} className="nav-item">
+                  <button
+                    className={`nav-link ${activeTab === item.id ? "active" : ""}`}
+                    onClick={() => setActiveTab(item.id)}
+                  >
+                    <item.icon size={16} />
+                    <span>{item.label}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
 
-          <div className="settings-content">
+          <main className="settings-content">
             {activeTab === "general" && (
-              <div className="settings-section">
-                <h3>General Settings</h3>
-                <div className="settings-grid">
-                  <div className="setting-item">
+              <div className="form-section">
+                <div className="section-header">
+                  <h2>General Settings</h2>
+                  <p>Basic information about your platform</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
                     <label>Site Name</label>
                     <input
+                      className="form-input"
                       type="text"
                       value={settings.general.siteName}
                       onChange={(e) => handleSettingChange("general", "siteName", e.target.value)}
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Site Description</label>
                     <input
+                      className="form-input"
                       type="text"
                       value={settings.general.siteDescription}
                       onChange={(e) => handleSettingChange("general", "siteDescription", e.target.value)}
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Contact Email</label>
                     <input
+                      className="form-input"
                       type="email"
                       value={settings.general.contactEmail}
                       onChange={(e) => handleSettingChange("general", "contactEmail", e.target.value)}
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Support Phone</label>
                     <input
+                      className="form-input"
                       type="tel"
                       value={settings.general.supportPhone}
                       onChange={(e) => handleSettingChange("general", "supportPhone", e.target.value)}
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Timezone</label>
                     <select
+                      className="form-select"
                       value={settings.general.timezone}
                       onChange={(e) => handleSettingChange("general", "timezone", e.target.value)}
                     >
@@ -178,9 +173,10 @@ const AdminSettings = () => {
                       <option value="America/Los_Angeles">Pacific Time</option>
                     </select>
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Default Currency</label>
                     <select
+                      className="form-select"
                       value={settings.general.currency}
                       onChange={(e) => handleSettingChange("general", "currency", e.target.value)}
                     >
@@ -194,12 +190,16 @@ const AdminSettings = () => {
             )}
 
             {activeTab === "platform" && (
-              <div className="settings-section">
-                <h3>Platform Settings</h3>
-                <div className="settings-grid">
-                  <div className="setting-item">
+              <div className="form-section">
+                <div className="section-header">
+                  <h2>Platform Settings</h2>
+                  <p>Core platform rules and defaults</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
                     <label>Commission Rate (%)</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.platform.commissionRate}
                       onChange={(e) =>
@@ -207,17 +207,19 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Minimum Age</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.platform.minimumAge}
                       onChange={(e) => handleSettingChange("platform", "minimumAge", Number.parseInt(e.target.value))}
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Maximum Booking Days</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.platform.maximumBookingDays}
                       onChange={(e) =>
@@ -225,9 +227,10 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Cancellation Window (hours)</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.platform.cancellationWindow}
                       onChange={(e) =>
@@ -235,97 +238,122 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item toggle">
-                    <label>Auto-approve Hosts</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.platform.autoApproveHosts}
-                      onChange={(e) => handleSettingChange("platform", "autoApproveHosts", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.platform.autoApproveHosts}
+                        onChange={(e) => handleSettingChange("platform", "autoApproveHosts", e.target.checked)}
+                      />
+                      {' '}Auto-approve Hosts
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>Auto-approve Cars</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.platform.autoApproveCars}
-                      onChange={(e) => handleSettingChange("platform", "autoApproveCars", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.platform.autoApproveCars}
+                        onChange={(e) => handleSettingChange("platform", "autoApproveCars", e.target.checked)}
+                      />
+                      {' '}Auto-approve Cars
+                    </label>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === "notifications" && (
-              <div className="settings-section">
-                <h3>Notification Settings</h3>
-                <div className="settings-grid">
-                  <div className="setting-item toggle">
-                    <label>Email Notifications</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.emailNotifications}
-                      onChange={(e) => handleSettingChange("notifications", "emailNotifications", e.target.checked)}
-                    />
+              <div className="form-section">
+                <div className="section-header">
+                  <h2>Notification Settings</h2>
+                  <p>Choose how you want to be notified</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.emailNotifications}
+                        onChange={(e) => handleSettingChange("notifications", "emailNotifications", e.target.checked)}
+                      />
+                      {' '}Email Notifications
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>SMS Notifications</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.smsNotifications}
-                      onChange={(e) => handleSettingChange("notifications", "smsNotifications", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.smsNotifications}
+                        onChange={(e) => handleSettingChange("notifications", "smsNotifications", e.target.checked)}
+                      />
+                      {' '}SMS Notifications
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>Push Notifications</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.pushNotifications}
-                      onChange={(e) => handleSettingChange("notifications", "pushNotifications", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.pushNotifications}
+                        onChange={(e) => handleSettingChange("notifications", "pushNotifications", e.target.checked)}
+                      />
+                      {' '}Push Notifications
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>Booking Alerts</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.bookingAlerts}
-                      onChange={(e) => handleSettingChange("notifications", "bookingAlerts", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.bookingAlerts}
+                        onChange={(e) => handleSettingChange("notifications", "bookingAlerts", e.target.checked)}
+                      />
+                      {' '}Booking Alerts
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>Payment Alerts</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.paymentAlerts}
-                      onChange={(e) => handleSettingChange("notifications", "paymentAlerts", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.paymentAlerts}
+                        onChange={(e) => handleSettingChange("notifications", "paymentAlerts", e.target.checked)}
+                      />
+                      {' '}Payment Alerts
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>System Alerts</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.notifications.systemAlerts}
-                      onChange={(e) => handleSettingChange("notifications", "systemAlerts", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.notifications.systemAlerts}
+                        onChange={(e) => handleSettingChange("notifications", "systemAlerts", e.target.checked)}
+                      />
+                      {' '}System Alerts
+                    </label>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === "security" && (
-              <div className="settings-section">
-                <h3>Security Settings</h3>
-                <div className="settings-grid">
-                  <div className="setting-item toggle">
-                    <label>Two-Factor Authentication</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.security.twoFactorAuth}
-                      onChange={(e) => handleSettingChange("security", "twoFactorAuth", e.target.checked)}
-                    />
+              <div className="form-section">
+                <div className="section-header">
+                  <h2>Security Settings</h2>
+                  <p>Protect accounts and access</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.security.twoFactorAuth}
+                        onChange={(e) => handleSettingChange("security", "twoFactorAuth", e.target.checked)}
+                      />
+                      {' '}Two-Factor Authentication
+                    </label>
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Session Timeout (minutes)</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.security.sessionTimeout}
                       onChange={(e) =>
@@ -333,9 +361,10 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Password Expiry (days)</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.security.passwordExpiry}
                       onChange={(e) =>
@@ -343,9 +372,10 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Max Login Attempts</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.security.loginAttempts}
                       onChange={(e) =>
@@ -358,28 +388,36 @@ const AdminSettings = () => {
             )}
 
             {activeTab === "payments" && (
-              <div className="settings-section">
-                <h3>Payment Settings</h3>
-                <div className="settings-grid">
-                  <div className="setting-item toggle">
-                    <label>Stripe Enabled</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.payments.stripeEnabled}
-                      onChange={(e) => handleSettingChange("payments", "stripeEnabled", e.target.checked)}
-                    />
+              <div className="form-section">
+                <div className="section-header">
+                  <h2>Payment Settings</h2>
+                  <p>Configure payment providers and payouts</p>
+                </div>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.payments.stripeEnabled}
+                        onChange={(e) => handleSettingChange("payments", "stripeEnabled", e.target.checked)}
+                      />
+                      {' '}Stripe Enabled
+                    </label>
                   </div>
-                  <div className="setting-item toggle">
-                    <label>PayPal Enabled</label>
-                    <input
-                      type="checkbox"
-                      checked={settings.payments.paypalEnabled}
-                      onChange={(e) => handleSettingChange("payments", "paypalEnabled", e.target.checked)}
-                    />
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={settings.payments.paypalEnabled}
+                        onChange={(e) => handleSettingChange("payments", "paypalEnabled", e.target.checked)}
+                      />
+                      {' '}PayPal Enabled
+                    </label>
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Minimum Payout ($)</label>
                     <input
+                      className="form-input"
                       type="number"
                       value={settings.payments.minimumPayout}
                       onChange={(e) =>
@@ -387,9 +425,10 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Processing Fee (%)</label>
                     <input
+                      className="form-input"
                       type="number"
                       step="0.1"
                       value={settings.payments.processingFee}
@@ -398,9 +437,10 @@ const AdminSettings = () => {
                       }
                     />
                   </div>
-                  <div className="setting-item">
+                  <div className="form-group">
                     <label>Payout Schedule</label>
                     <select
+                      className="form-select"
                       value={settings.payments.payoutSchedule}
                       onChange={(e) => handleSettingChange("payments", "payoutSchedule", e.target.value)}
                     >
@@ -412,7 +452,7 @@ const AdminSettings = () => {
                 </div>
               </div>
             )}
-          </div>
+          </main>
         </div>
       </div>
     </div>
